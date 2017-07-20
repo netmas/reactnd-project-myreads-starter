@@ -17,11 +17,13 @@ class SearchBooks extends Component {
     }
 
   componentDidMount() {
-    this.updateQuery("")
+    this.updateQuery("", [])
   }
 
   /*Required 1 && 2 - Done*/
-  updateQuery = (query) => {
+  updateQuery = (query, myBooks) => {
+    //var myBooks = this.state.myBooksVar
+    //alert(myBooks.length)
     BooksAPI.search(query,20).then((books) => {
       books === undefined?(
           this.setState({ books:[], query })
@@ -29,6 +31,18 @@ class SearchBooks extends Component {
           books.error?(
             this.setState({ books:[], query })
           ):(
+
+             books = books.map((book)=>{
+              let flag = 0;
+              myBooks.forEach((myBook)=>{
+                  book.id === myBook.id &&(
+                      book.shelf = myBook.shelf,
+                      flag = 1
+                    )
+                })
+              flag === 0 &&(book.shelf = 'none')
+              return book
+            }),
             this.setState({ books, query }) 
           )
         )
@@ -37,8 +51,9 @@ class SearchBooks extends Component {
 
 
 	render(){
-    const { onChangeShelf } = this.props
-    const { query, books } = this.state
+    const { onChangeShelf,  myBooks} = this.props
+    const { query, books} = this.state
+
     const bookShelf = [  {code:'currentlyReading', description:'Currently Reading'}, 
               {code:'wantToRead', description:'Want to Read'}, 
               {code:'read', description:'Read'},
@@ -68,7 +83,7 @@ class SearchBooks extends Component {
               type="text" 
               placeholder="Search by title or author"
               value={query}
-              onChange={(event) => this.updateQuery(event.target.value)}
+              onChange={(event) => this.updateQuery(event.target.value, myBooks)}
             />
           </div>
         </div>
